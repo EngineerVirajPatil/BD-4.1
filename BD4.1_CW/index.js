@@ -19,8 +19,8 @@ let db;
 
 
 async function fetchAllMovies() {
-  const query = 'SELECT * FROM MOVIES';
-  const response = await db.all(query);
+  let query = 'SELECT * FROM MOVIES';
+  let response = await db.all(query);
   return { movies: response };
 }
 
@@ -45,8 +45,9 @@ async function fetchMoviesByReleaseYear(releaseYear){
 
 app.get('/movies', async (req, res) => {
   try {
-    const result = await fetchAllMovies();
+    let result = await fetchAllMovies();
     res.status(200).json(result);
+
   } catch (error) {
     console.error('Error fetching movies:', error.message);
     res.status(500).json({ error: 'Failed to fetch movies.' });
@@ -57,7 +58,7 @@ app.get('/movies/genre/:genre',async(req, res)=>{
  let genre=req.params.genre;
 
  try {
-  const result= await fetchMoviesByGenre(genre);
+  let result= await fetchMoviesByGenre(genre);
   res.status(200).json(result);
 } catch (error) {
   console.error('Error fetching movies:', error.message);
