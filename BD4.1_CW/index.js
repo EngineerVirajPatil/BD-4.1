@@ -42,12 +42,28 @@ async function fetchMoviesByReleaseYear(releaseYear){
   return {movies:response};
 }
 
+async function  filterByActor(actor){
+  let query='SELECT * FROM MOVIES WHERE actor=?';
+  let response=await db.all(query,[actor]);
+  return {movies:response};
+}
+
+async function filterByDirector(director){
+  let query='SELECT * FROM MOVIES WHERE director=?';
+  let response=await db.all(query,[director]);
+  return {movies:response};
+}
+
 
 app.get('/movies', async (req, res) => {
   try {
     let result = await fetchAllMovies();
-    res.status(200).json(result);
-
+    if(result.movies.length===0){
+      res.status(404).json({message:'No movies found'});
+    }
+    else{
+      res.status(200).json(result);
+    }
   } catch (error) {
     console.error('Error fetching movies:', error.message);
     res.status(500).json({ error: 'Failed to fetch movies.' });
@@ -59,7 +75,12 @@ app.get('/movies/genre/:genre',async(req, res)=>{
 
  try {
   let result= await fetchMoviesByGenre(genre);
-  res.status(200).json(result);
+  if(result.movies.length===0){
+    res.status(404).json({message:'No movies found with genre: '+genre});
+  }
+  else{
+    res.status(200).json(result);
+  }
 } catch (error) {
   console.error('Error fetching movies:', error.message);
   res.status(500).json({ error: 'Failed to fetch movies.' });
@@ -68,10 +89,14 @@ app.get('/movies/genre/:genre',async(req, res)=>{
 
 app.get('/movies/details/:id',async(req, res)=>{
   let id=req.params.id;
- 
   try {
-   const result= await fetchMoviesById(id);
-   res.status(200).json(result);
+   let result= await fetchMoviesById(id);
+   if(result.movies.length===0){
+    res.status(404).json({message:'No movies found with id: '+id});
+  }
+  else{
+    res.status(200).json(result);
+  }
  } catch (error) {
    console.error('Error fetching movies:', error.message);
    res.status(500).json({ error: 'Failed to fetch movies.' });
@@ -82,15 +107,50 @@ app.get('/movies/details/:id',async(req, res)=>{
  app.get('/movies/release-year/:year',async(req, res)=>{
   let releaseYear=parseInt(req.params.year);
   try {
-   const result= await fetchMoviesByReleaseYear(releaseYear);
-   res.status(200).json(result);
+   let result= await fetchMoviesByReleaseYear(releaseYear);
+   if(result.movies.length===0){
+    res.status(404).json({message:'No movies found with year: '+releaseYear});
+  }
+  else{
+    res.status(200).json(result);
+  }
+ } catch (error) {
+   console.error('Error fetching movies:', error.message);
+   res.status(500).json({ error: 'Failed to fetch movies.' });
+ }
+ });
+
+ app.get('/movies/actor/:actor',async(req, res)=>{
+  let actor=req.params.actor;
+  try {
+   let result= await filterByActor(actor);
+   if(result.movies.length===0){
+    res.status(404).json({message:'No movies found with year: '+actor});
+  }
+  else{
+    res.status(200).json(result);
+  }
  } catch (error) {
    console.error('Error fetching movies:', error.message);
    res.status(500).json({ error: 'Failed to fetch movies.' });
  }
  });
  
-
+ app.get('/movies/director/:director',async(req, res)=>{
+  let director=req.params.director;
+  try {
+   let result= await filterByDirector(director);
+   if(result.movies.length===0){
+    res.status(404).json({message:'No movies found with year: '+director});
+  }
+  else{
+    res.status(200).json(result);
+  }
+ } catch (error) {
+   console.error('Error fetching movies:', error.message);
+   res.status(500).json({ error: 'Failed to fetch movies.' });
+ }
+ });
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
